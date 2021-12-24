@@ -1,0 +1,9 @@
+test __register_chrdev_region() function.
+https://elixir.bootlin.com/linux/v4.9.59/source/fs/char_dev.c#L74
+
+使用一个散列表*chrdevs[CHRDEV_MAJOR_HASH_SIZE]存储设备号，散列表数组长度为CHRDEV_MAJOR_HASH_SIZE(255)。
+可用于动态申请主设备号，动态申请时从CHRDEV_MAJOR_HASH_SIZE-1（254）由大到小找未使用的主设备号。
+静态注册设备号，找到散列表中的位置直接插入，如果下列情况：
+    1. 待注册的从设备号和已经注册的从设备号重叠，注册失败并报错；
+    2. 待注册的从设备被已经注册从设备号包含，注册失败并报错，（左重叠）；
+    3. 待注册的从设备包含已注册的从设备号，不报错,插入节点，这里有bug?

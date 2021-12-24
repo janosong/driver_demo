@@ -10,7 +10,7 @@
 #include <linux/fs.h>
 
 
-
+#define PRT 1
 #ifdef PRT
 #define PRINT_A(x) (\
     printk(KERN_INFO #x":%d %p\n", sizeof(x), &x))
@@ -45,11 +45,13 @@ static __attribute__((unused)) void print_task(void)
     PRINT(mm->env_end);
     PRINT(mm->total_vm);
 
+#if 0
     for (; mmap || (mmap==vm_end); mmap = mmap->vm_next) {
         PRINT(mm->mmap);
         PRINT(mmap->vm_start);
         PRINT(mmap->vm_end);
     }
+#endif
 }
 
 static __attribute__((unused))void print_page(void)
@@ -101,6 +103,25 @@ static __attribute__((unused))void print_page(void)
 
 }
 
+static ssize_t dmoe_read(struct file *filp, char __user *buf, size_t size, loff_t *ppos)
+{
+    return size;
+}
+int demo_open(struct inode *inode, struct file *filp)
+{
+    PRINT(current->pid);
+    PRINT(filp);
+    return 0;
+}
+int demo_release(struct inode *inode, struct file *fp)
+{
+    return 0;
+}
+int demo_poll(struct file *filp, struct poll_table_struct *wait)
+{
+    PRINT(filp);
+    return 0;
+}
 #define DEVNAME "test_demo"
 static struct demo {
     struct class *class;
@@ -110,9 +131,9 @@ static struct demo {
 
 static const struct file_operations fops = {
     .owner = THIS_MODULE,
-    .open = NULL,
+    .open = demo_open,
     .read = NULL,
-    .release = NULL,
+    .release = demo_release,
 };
 
 static void init_cdev(void)
